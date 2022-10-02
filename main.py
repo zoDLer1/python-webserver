@@ -1,7 +1,14 @@
+import config
 import socket
 import datetime
 from dataclasses import dataclass
-from urls import urls
+from urls import urls, static_url
+from handler import Response_404
+from MIME_types import types
+from headers import Headers, ContentType
+
+
+
 
 
 @dataclass
@@ -13,21 +20,53 @@ class Request:
     user: socket.socket
     address: tuple[str, int]
 
-    def response(self, headers={}, status_code=200):
-        pass
+    def render(self, path, mode='r'):
+        with open(path, mode) as file:
+            extension = path[path.rfind('.')+1:]
+            return self.response(file.read(), headers=[ContentType('Content-Type', types.get_type(extension), config.DEFAULT_CHARSET)])
+
+    def response(self, info, headers={}, status_code=200):
+        hdrs = f" {self.protocol} {status_code}\r\n"
+        for header in headers:
+            hdrs += header.to_string()
+        hdrs += '\r\n'
+        return Response(self, info, hdrs, status_code)
     
-    
+@dataclass
 class Response:
-    code: int 
     request: Request
     info: str
-    headers: dict
-
-
+    str_headers: str
+    code: int 
+    
+    def send(self):
+        if isinstance(self.info, str):
+            self.info = self.info.encode(Server.DEFAULT_CHARSET)
         
+        self.request.user.send(self.str_headers.encode(Server.DEFAULT_CHARSET) + self.info)
+      
+    
+
+    #    with open(path, mode) as file:    
+    #         extention = path[:path.rfind('.')]
+    #         return self.response(file.read(), {'Content-Type': types.get_type(extention)})
 
 
 class Server:
+    
+    
+    
+    URLS = {
+        'main': urls,
+        'static': static_url,
+    }
+    
+    DEFAULT_CHARSET = config.DEFAULT_CHARSET
+    
+    RESPONSE_HEADERS = {
+        'protocol': 'HTTP/1.1',
+        'content-type': 'text/html'
+    }
     
     DEFAULT_PARSE_RULES = [
         lambda value: value.lower().strip()   
@@ -46,31 +85,19 @@ class Server:
         self.server.listen()
         self.accept_client()
 
-    @classmethod
-    def normalize_header(cls, header:str):
-        key, value = header.split(': ')
-        for rule in cls.DEFAULT_PARSE_RULES:
-            key = rule(key)
-            value = rule(value)
-        if key in cls.HEADERS_PARSE_RULES:
-            value = cls.HEADERS_PARSE_RULES[key](value)
-        return key, value
+
 
     @classmethod
     def parse_headers(cls, str_info:str, user:tuple[socket.socket, tuple[str, int]]) -> Request:
         request_info, *headers_set = str_info.split('\r\n')
         headers = {}
-        for header in headers_set:
-            if header:
-                print(header)
-                key, value = cls.normalize_header(header)
-                headers[key] = value
+        for header_info in headers_set:
+            if header_info:
+                header_name = Headers.name(header_info).lower()
+                headers[header_name] = Headers.header(header_name).parse(header_info)
+                
         user, address = user
-        
         return Request(*request_info.split(' '), headers=headers, user=user, address=address)
-        
-       
-        
         
     def accept_client(self):
         while True:
@@ -79,26 +106,23 @@ class Server:
             request =  self.parse_headers(info, user)
             print(f'[{datetime.datetime.now()}] Request type "{request.method}" {request.path} from {request.address[0]}')
             self.find_url(request)
-            # client.send(self.Get(request.path))
-            # client.shutdown(socket.SHUT_WR)
+            client.shutdown(socket.SHUT_WR)
+
 
     def find_url(self, request):
-        view_obj = urls.path(request.path)()
-        response_info = getattr(view_obj, request.method.lower())(request)
+        for url in self.URLS:
+            view_obj = self.URLS[url].path(request.path)
+            if view_obj:
+                break
+        print(view_obj)
+        if not view_obj:
+            view_obj = Response_404
         
-        request.user.send('HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n'.encode('utf-8') + response_info.encode('utf-8'))
+        response = getattr(view_obj(), request.method.lower())(request)
+        response.send()
+        # request.user.send('HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n\r\n'.encode('utf-8') + response.info.encode('utf-8'))
 
 
-    # def Get(self, path):
-    #     path = path[1:]
-    #     try:
-    #         with open(path, 'rb') as file:
-    #             data = file.read()
-    #             file.close()
-    #         return str(self.HEADERS['200']).encode('utf-8')
-
-    #     except FileNotFoundError:
-    #         return self.HEADERS['404'] + b'page is not found'
 
 
             
