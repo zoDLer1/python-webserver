@@ -6,7 +6,7 @@ from urls import urls, static_url
 from handler import Response_404
 from MIME_types import types
 from headers import Headers, ContentType
-
+from threading import Thread
 
 
 
@@ -26,11 +26,12 @@ class Request:
             extension = path[path.rfind('.')+1:]
             return self.response(file.read(), headers=[ContentType(types.get_type(extension), config.DEFAULT_CHARSET)])
 
-    def response(self, info, headers={}, status_code=200):
+    def response(self, info='', headers=[], status_code=200):
         hdrs = f" {self.protocol} {status_code}\r\n"
         for header in headers:
             hdrs += header.to_string()
         hdrs += '\r\n'
+        
         return Response(self, info, hdrs, status_code)
     
 @dataclass
@@ -46,10 +47,6 @@ class Response:
         
         self.request.user.send(self.str_headers.encode(Server.DEFAULT_CHARSET) + self.info)
       
-    
-
-
-
 class Server:
     
     URLS = {
@@ -65,7 +62,6 @@ class Server:
         self.server.listen()
         self.accept_client()
 
-
     def parse_headers(self, str_info:str, user:tuple[socket.socket, tuple[str, int]]) -> Request:
         request_info, *headers_set = str_info.split('\r\n')
         method, path, protocol = request_info.split(' ')
@@ -76,7 +72,6 @@ class Server:
         return Request(method, path, protocol, params, headers, user, address)
 
     def parse_url(self, url: str):
-        print(url.split('?', 1))
         path, *params = url.split('?', 1)
         params = ''.join(params)
         dict_params = dict([param.split('=', 1) for param in params.split('&') if param]) 
@@ -85,16 +80,31 @@ class Server:
         
     def accept_client(self):
         while True:
-            user = client, address = self.server.accept()
+            user = self.server.accept()
+            client, address = user
             info = client.recv(1024).decode('utf-8')
-            # info2 = client.recv(2048).decode('utf-8')
-            print('1', info)
-            # print('----------')
-            # print('2', info2)
-            request =  self.parse_headers(info, user)
+            request = self.parse_headers(info, user)
             print(f'[{datetime.datetime.now()}] Request type "{request.method}" {request.path} from {request.address[0]}')
             self.find_url(request)
             client.shutdown(socket.SHUT_WR)
+            
+            # Thread(target=self.accept_request, args=[user]).start()
+            # info2 = client.recv(2048).decode('utf-8')
+            
+            
+
+    # def accept_request(self, user):
+    #     client, address = user
+    #     while True:
+    #         info = client.recv(1024).decode('utf-8')
+    #         # print('1', info)
+    #         # print('----------')
+    #         # print('2', info2)
+    #         request = self.parse_headers(info, user)
+    #         print(f'[{datetime.datetime.now()}] Request type "{request.method}" {request.path} from {request.address[0]}')
+    #         self.find_url(request)
+    #         client.shutdown(socket.SHUT_WR)
+
 
     def find_url(self, request):
         for url in self.URLS:

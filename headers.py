@@ -141,6 +141,15 @@ class Indefinited_Headrer(Header):
 class Referer(Header):
     pass
 
+class Access_Control_Allow_Origin(Header):
+    pass
+
+class Access_Control_Allow_Methods(Header):
+    pass
+
+class Access_Control_Allow_Headers(Header):
+    pass
+
 class Headers:
     DEFAULT_HEADER = Indefinited_Headrer
     HEADERS = {
@@ -159,7 +168,9 @@ class Headers:
         'sec-fetch-dest': Sec_Fetch_Dest,
         'accept-encoding': Accept_Encoding,
         'accept-language': Accept_Language,
-        'referer': Referer
+        'referer': Referer,
+        'access-control-allow-origin': Access_Control_Allow_Origin,
+        'access-control-allow-methods': Access_Control_Allow_Methods
     }
         
     @classmethod
