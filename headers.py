@@ -1,33 +1,40 @@
 from dataclasses import dataclass
-from re import L
 
 
-@dataclass
+
 class Header:
-    name: str
     value: str
+    
+    def __init__(self,  value):
+        self.value = value
+    
+    @classmethod
+    def parse(cls, value):
+        name, value =  value.split(":", maxsplit=1)
+        return cls(value.strip())
+    
+    def to_string(self):
+        return f'{self.name}: {self.value}\r\n'
+
+    @property
+    def name(self):
+        return self.__class__.__name__.replace("_", "-")
+    
+class ContentType(Header):
+    
+    def __init__(self,  value, charset):
+        self.value = value
+        self.charset = charset
     
     @classmethod
     def parse(cls, value):
         name, value =  value.split(":")
-        return cls(*map(lambda i: i.strip(), (name, value)))
-    
-    def to_string(self):
-        return f'{self.name}: {self.value}\r\n'
-    
-@dataclass
-class ContentType(Header):
-    charset: str
-    
-    @classmethod
-    def parse(cls, value='Content-Type: text/html; charset=utf-8'):
-        name, value =  value.split(":")
         value, charset = value.split(';')
         charset = charset[charset.rfind('=')+1:]
-        return cls(*map(lambda i: i.strip(), (name, value, charset)))
+        return cls(*map(lambda i: i.strip(), (value, charset)))
     
     def to_string(self):
-        return f'{self.name}: {self.value}; charset={self.charset}\r\n'
+        return self.name + f'; charset={self.charset}\r\n'
 
 class Host(Header):
     pass
@@ -35,9 +42,14 @@ class Host(Header):
 class Connection(Header):
     pass
 
-@dataclass
+
 class Cache_Control(Header):
-    count: str
+
+    def __init__(self, value, count):
+        super().__init__(value)
+        self.count = count
+    
+    
     
     @classmethod
     def parse(cls, value):
@@ -45,11 +57,11 @@ class Cache_Control(Header):
         name, value =  value.split(":")
         if '=' in value:
             value, count = value.split('=')
-        return cls(*map(lambda i: i.strip(), (name, value, count)))
+        return cls(*map(lambda i: i.strip(), (value, count)))
     
     def to_string(self):    
-        count = '' if not self.count else f'={self.count}'
-        return f'{self.name}: {self.value}{count}\r\n'
+        count = '' if not self.count else f'={self.count}\r\n'
+        return self.name + count
 
 class Sec_Ch_Ua(Header):
     pass
@@ -77,10 +89,10 @@ class Accept(Header):
             mime_type, *adding,  = mime_type.split(';')
             adding = dict([tuple(item.split('=')) for item in adding]) if adding else {}
             dict_value[mime_type] = adding
-        return cls(name.strip(), dict_value)
+        return cls(dict_value)
     
     def to_string(self):
-        string = f'{self.name}: '
+        string = f'{self.name}'
         for mime_type, value in self.value.items():
             string += f'{mime_type}'
             for key, val in value.items():
@@ -102,11 +114,12 @@ class Sec_Fetch_Dest(Header):
 
 class Accept_Encoding(Header):
     value: list
+    
     @classmethod
     def parse(cls, value):
         name, value =  value.split(":")
         encoding_types = value.split(",")
-        return cls(name.strip(), encoding_types)
+        return cls(encoding_types)
     
     def to_string(self):
         return f'{self.name}: ' + ','.join(self.value) + '\r\n'
@@ -114,10 +127,22 @@ class Accept_Encoding(Header):
 class Accept_Language(Header):
     pass
 
+class Indefinited_Headrer(Header):
+    def __init__(self, name, value):
+        print(f'Header {name} is not definded')
+        self.label = name
+        self.value = value    
+    
+    @classmethod
+    def parse(cls, value):
+        name, value =  value.split(":", maxsplit=1)
+        return cls(name.strip(), value.strip())
 
+class Referer(Header):
+    pass
 
 class Headers:
-    DEFAULT_HEADER = Header
+    DEFAULT_HEADER = Indefinited_Headrer
     HEADERS = {
         'host': Host,
         'connection': Connection,
@@ -133,20 +158,19 @@ class Headers:
         'sec-fetch-user': Sec_Fetch_User,
         'sec-fetch-dest': Sec_Fetch_Dest,
         'accept-encoding': Accept_Encoding,
-        'accept-language': Accept_Language
+        'accept-language': Accept_Language,
+        'referer': Referer
     }
         
     @classmethod
     def header(cls, header):
-        header = cls.HEADERS.get(header)
-        if not header:
-            header = cls.DEFAULT_HEADER
-        return header
+        hdr = cls.HEADERS.get(cls.name(header))
+        return cls.DEFAULT_HEADER.parse(header) if not hdr else hdr.parse(header)
 
     @staticmethod
     def name(value):
         name, *_ =  value.split(":")
-        return name
+        return name.strip().lower()
 
 
 

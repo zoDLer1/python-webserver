@@ -1,4 +1,4 @@
-from handler import View, Response_404, FileReader
+from handler import View, Response_404, FileReader, MyView
 import os
 import config
 
@@ -10,8 +10,6 @@ class StaticUrls:
         if os.path.exists(config.STATIC_FOLDER + url):
             handler = FileReader
         return handler
-    
-    
 
 class Urls:
     
@@ -23,7 +21,10 @@ class Urls:
     
 
 
+
+
 urls = Urls({
-    '/': View
+    '/': MyView,
+    
 })
 static_url = StaticUrls()
