@@ -16,6 +16,7 @@ class Request:
     method: str
     path: str
     protocol: str
+    params : str
     headers: dict
     user: socket.socket
     address: tuple[str, int]
@@ -64,19 +65,30 @@ class Server:
         self.server.listen()
         self.accept_client()
 
-    @classmethod
-    def parse_headers(cls, str_info:str, user:tuple[socket.socket, tuple[str, int]]) -> Request:
+
+    def parse_headers(self, str_info:str, user:tuple[socket.socket, tuple[str, int]]) -> Request:
         request_info, *headers_set = str_info.split('\r\n')
+        method, path, protocol = request_info.split(' ')
+        path, params = self.parse_url(path)
+        
         headers = [Headers.header(header_info) for header_info in headers_set if header_info]                
         user, address = user
-        return Request(*request_info.split(' '), headers=headers, user=user, address=address)
+        return Request(method, path, protocol, params, headers, user, address)
+
+    def parse_url(self, url: str):
+        print(url.split('?', 1))
+        path, *params = url.split('?', 1)
+        params = ''.join(params)
+        dict_params = dict([param.split('=', 1) for param in params.split('&') if param]) 
+        return path, dict_params
+        
         
     def accept_client(self):
         while True:
             user = client, address = self.server.accept()
             info = client.recv(1024).decode('utf-8')
             # info2 = client.recv(2048).decode('utf-8')
-            # print('1', info)
+            print('1', info)
             # print('----------')
             # print('2', info2)
             request =  self.parse_headers(info, user)
