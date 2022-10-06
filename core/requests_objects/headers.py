@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-
-
-
 class Header:
     value: str
     
@@ -34,7 +30,7 @@ class ContentType(Header):
         return cls(*map(lambda i: i.strip(), (value, charset)))
     
     def to_string(self):
-        return self.name + f'; charset={self.charset}\r\n'
+        return self.name + f': {self.value}; charset={self.charset}\r\n'
 
 class Host(Header):
     pass

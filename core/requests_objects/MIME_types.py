@@ -10,7 +10,7 @@ class Types:
 types = Types({
     'ico': 'image/vnd.microsoft.icon',
     'html': 'text/html',
-    'js': 'text/javascript',
+    'js': 'application/javascript',
     'css': 'text/css',
     'default': 'text/html'
 })
