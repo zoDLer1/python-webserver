@@ -1,6 +1,4 @@
 import socket
-
-import keyboard
 import config
 import datetime
 from core.views_objects.view import Response_404 
@@ -42,6 +40,9 @@ class Server:
             user = self.server.accept()
             client, address = user
             info = client.recv(1024).decode('utf-8')
+            # print(info)
+            # info2 = client.recv(1024).decode('utf-8')
+            # print(info2)
             request = self.parse_headers(info, user)
             print(f'[{datetime.datetime.now()}] Request type "{request.method}" {request.path} from {request.address[0]}')
             self.find_url(request)

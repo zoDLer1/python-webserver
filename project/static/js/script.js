@@ -1,6 +1,6 @@
 axios({
-    method: 'post',
-    url: 'http://localhost:8080/test',
+    method: 'delete',
+    url: 'http://localhost/test',
     data: {
       firstName: 'Fred',
       lastName: 'Flintstone'

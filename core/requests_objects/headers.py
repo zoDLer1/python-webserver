@@ -146,6 +146,9 @@ class Access_Control_Allow_Methods(Header):
 class Access_Control_Allow_Headers(Header):
     pass
 
+class Content_Length(Header):
+    pass
+
 class Headers:
     DEFAULT_HEADER = Indefinited_Headrer
     HEADERS = {
@@ -166,7 +169,8 @@ class Headers:
         'accept-language': Accept_Language,
         'referer': Referer,
         'access-control-allow-origin': Access_Control_Allow_Origin,
-        'access-control-allow-methods': Access_Control_Allow_Methods
+        'access-control-allow-methods': Access_Control_Allow_Methods,
+        'content-length': Content_Length
     }
         
     @classmethod

@@ -15,6 +15,7 @@ class Request:
     address: tuple[str, int]
 
     def render(self, path, mode='r'):
+        path = config.PROJECT_FOLDER + '/' + path
         with open(path, mode) as file:
             extension = path[path.rfind('.')+1:]
             return self.response(file.read(), headers=[ContentType(types.get_type(extension), config.DEFAULT_CHARSET)])

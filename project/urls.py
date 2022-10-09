@@ -1,5 +1,5 @@
 from core.urls.url import Urls
-from views import *
+from project.views import *
 
 
 
