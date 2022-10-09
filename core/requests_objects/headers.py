@@ -38,7 +38,6 @@ class Host(Header):
 class Connection(Header):
     pass
 
-
 class Cache_Control(Header):
 
     def __init__(self, value, count):
@@ -172,6 +171,19 @@ class Headers:
         'access-control-allow-methods': Access_Control_Allow_Methods,
         'content-length': Content_Length
     }
+       
+    def __init__(self, headers_list):
+        self.list = headers_list
+        
+    def get(self, name):
+        name = name.lower()
+        for header in self.list:
+            if header.name.lower() == name:
+                return header
+        return None
+        
+    def exists(self, name):
+        return bool(self.get(name))
         
     @classmethod
     def header(cls, header):
@@ -187,10 +199,6 @@ class Headers:
 
 
 
-
-# p = Accept_Encoding.parse('Accept-Encoding: gzip, deflate, br')
-# print(p.value)
-# print(p.to_string())
 
 ['Host: localhost', 'Connection: keep-alive', 'Cache-Control: max-age=0', 
  'sec-ch-ua: "Not-A.Brand";v="99", "Opera GX";v="91", "Chromium";v="105"', 

@@ -5,7 +5,7 @@ from core.views_objects.view import Response_404
 from core.requests_objects.headers import Headers
 from core.requests_objects.objs import Request
 from core.urls.static_url import StaticUrls
-
+import json
 
 
 class Server:
@@ -24,7 +24,7 @@ class Server:
         method, path, protocol = request_info.split(' ')
         path, params = self.parse_url(path)
         
-        headers = [Headers.header(header_info) for header_info in headers_set if header_info]                
+        headers = Headers([Headers.header(header_info) for header_info in headers_set if header_info])               
         user, address = user
         return Request(method, path, protocol, params, headers, user, address)
 
@@ -34,16 +34,23 @@ class Server:
         dict_params = dict([param.split('=', 1) for param in params.split('&') if param]) 
         return path, dict_params
         
+    def parse_data(self, data):
+        return json.loads(data)
+        
+        
     def accept_client(self):
         
         while True:
             user = self.server.accept()
             client, address = user
             info = client.recv(1024).decode('utf-8')
-            # print(info)
-            # info2 = client.recv(1024).decode('utf-8')
-            # print(info2)
             request = self.parse_headers(info, user)
+            if request.headers.exists('content-length'):
+                data = client.recv(int(request.headers.get('content-length').value)).decode('utf-8')
+                request.data = self.parse_data(data)
+                
+                
+            
             print(f'[{datetime.datetime.now()}] Request type "{request.method}" {request.path} from {request.address[0]}')
             self.find_url(request)
             client.shutdown(socket.SHUT_WR)
@@ -76,3 +83,4 @@ class Server:
         
         response = getattr(view_obj(), request.method.lower())(request)
         response.send()
+

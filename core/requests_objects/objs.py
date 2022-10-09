@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import config
 import socket
-from core.requests_objects.headers import ContentType
+from core.requests_objects.headers import ContentType, Headers
 from core.requests_objects.MIME_types import types
 
 @dataclass
@@ -10,9 +10,10 @@ class Request:
     path: str
     protocol: str
     params : str
-    headers: dict
+    headers: Headers
     user: socket.socket
     address: tuple[str, int]
+    data = {}
 
     def render(self, path, mode='r'):
         path = config.PROJECT_FOLDER + '/' + path
