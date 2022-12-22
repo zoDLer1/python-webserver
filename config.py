@@ -5,6 +5,6 @@ STATIC_FOLDER = 'static'
 PROJECT_FOLDER = 'project'
 
 DEFAULT_CHARSET = 'utf-8'
-HOST = ('localhost', 80)
+HOST = ('localhost', 8080)
 URLS = [urls]
 DEFAULT_404_VIEW = Response_404

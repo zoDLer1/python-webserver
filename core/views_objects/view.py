@@ -15,6 +15,7 @@ class View:
         return request.response(headers=[Access_Control_Allow_Origin('*'), 
                                          Access_Control_Allow_Methods('*'),
                                          Access_Control_Allow_Headers('*')])  
+        
     def delete(self, request):
         return self.request(request)
     

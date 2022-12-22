@@ -13,7 +13,7 @@ class Request:
     headers: Headers
     user: socket.socket
     address: tuple[str, int]
-    data = {}
+    data: None
 
     def render(self, path, mode='r'):
         path = config.PROJECT_FOLDER + '/' + path

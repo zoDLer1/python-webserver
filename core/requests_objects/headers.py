@@ -124,7 +124,7 @@ class Accept_Language(Header):
 
 class Indefinited_Headrer(Header):
     def __init__(self, name, value):
-        print(f'Header {name} is not definded')
+        # print(f'Header {name} is not definded')
         self.label = name
         self.value = value    
     

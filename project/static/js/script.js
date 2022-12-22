@@ -1,5 +1,5 @@
 axios({
-    method: 'delete',
+    method: 'post',
     url: 'http://localhost/test',
     data: {
       firstName: 'Fred',

@@ -4,7 +4,7 @@ from project.views import *
 
 
 urls = Urls({
-    '/': MyView,
-    '/test': TestView
-    
+    # '/': MyView,
+    '/test': TestView,
+
 })
