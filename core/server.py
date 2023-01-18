@@ -22,12 +22,9 @@ class Server:
     def parse_headers(self, str_info:str, user:tuple[socket.socket, tuple[str, int]]):
         request_info, *headers_set = str_info.split('\r\n')
     
-        data = headers_set[-1]
-        data = headers_set.pop() if data and ': ' not in data else None
-        # print(data)
-            
-            
-        
+        data = headers_set.pop()
+        if not data:
+            data = None
         
         method, path, protocol = request_info.split(' ')
         path, params = self.parse_url(path)
