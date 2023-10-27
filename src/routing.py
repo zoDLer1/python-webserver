@@ -2,13 +2,14 @@ from .data_handlers.request import Request
 from .data_handlers.response import Response, FileResponse
 from .helpers import normalize_url
 from .exceptions.http_exceptions import NotFound
+from .controller import Controller
 import os
 
 
 
 class Route:
 
-    def __init__(self, url: str, method: str, callback) -> None:
+    def __init__(self, url: str, method: str, callback: tuple[Controller, str]) -> None:
         self.url = normalize_url(url)
         self.method = method
         self.callback = callback
@@ -17,6 +18,10 @@ class Route:
         return self.url == normalize_url(request.url.path) and self.method == request.method
 
     def run(self, request: Request) -> Response:
+        if (isinstance(self.callback, tuple)):
+            controller_class, method_name = self.callback
+            controller = controller_class()
+            return getattr(controller, method_name)(request)
         return self.callback(request)
 
 class StaticRoute:
