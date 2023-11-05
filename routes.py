@@ -5,8 +5,8 @@ from controllers.main_controller import MainController
 
 router = Router()
 
-router.register('/album', 'GET', (MainController, 'index'))
+router.register('/album', 'GET', MainController.as_view())
 
-router.register('/redirect', 'GET', lambda r: RedirectResponse(r, '/test'))
+router.register('/redirect', 'GET', lambda r: RedirectResponse(r, '/album'))
 
 router.use_static(PUBLIC_DIR)

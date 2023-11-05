@@ -1,8 +1,14 @@
+from ..status_codes.codes import NotFound, UnsupportedMediaType, MethodNotAllowed, InternalServerError
+
+
 class HttpException(Exception):
-    status = 500
+    status_code = InternalServerError()
 
-class UnsupportedMediaType(HttpException):
-    status = 415
+class UnsupportedMediaTypeException(HttpException):
+    status_code = UnsupportedMediaType()
 
-class NotFound(HttpException):
-    status = 404
+class NotFoundException(HttpException):
+    status_code = NotFound()
+
+class MethodNotAllowedException(HttpException):
+    status_code = MethodNotAllowed()

@@ -1,8 +1,8 @@
 from src.data_handlers.response import Request, FileResponse
-from src.controller import Controller
+from src.controller import HttpController
 
-class MainController(Controller):
+class MainController(HttpController):
 
-    def index(self, request: Request):
+    def get(self, request: Request):
         return FileResponse(request, 'pages/album.html')
 

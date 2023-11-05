@@ -4,10 +4,11 @@ from settings import SERVER, DEFAULT_CHARSET
 from .headers import HeadersSet
 from datetime import datetime
 from ..readers.files import FileReader
+from ..status_codes.codes import Ok, PermanentRedirect
 
 class Response:
 
-    def __init__(self, request: Request, body: bytes = b'', status=200, headers=[], cookies=[]) -> None:
+    def __init__(self, request: Request, body: bytes = b'', status=Ok(), headers=[], cookies=[]) -> None:
         self.request = request
         self.headers = self.server_headers()
         self.body = body
@@ -33,16 +34,16 @@ class Response:
 
     @classmethod
     def from_exception(cls, request, exception: HttpException):
-        return cls(request, status=exception.status)
+        return cls(request, status=exception.status_code)
 
 class RedirectResponse(Response):
     def __init__(self, request: Request, redirect_url, headers=[], cookies=[]) -> None:
-        super().__init__(request, status=301, headers=headers, cookies=cookies)
+        super().__init__(request, status=PermanentRedirect(), headers=headers, cookies=cookies)
         self.headers['Location'] = redirect_url
 
 class FileResponse(Response):
 
-    def __init__(self, request, filepath, status=200, headers=[], cookies=[]) -> None:
+    def __init__(self, request, filepath, status=Ok(), headers=[], cookies=[]) -> None:
         super().__init__(request, status=status, headers=headers, cookies=cookies)
         reader = FileReader(filepath)
         if (reader.mimetype):

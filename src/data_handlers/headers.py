@@ -15,7 +15,7 @@ class HeadersSet:
     def prepare(self):
         str_headers = ''
         for header_name in self.headers_set:
-            str_headers += ' :'.join([header_name, self.headers_set[header_name]]) + '\r\n'
+            str_headers += ': '.join([header_name, self.headers_set[header_name]]) + '\r\n'
         return str_headers
 
     @classmethod

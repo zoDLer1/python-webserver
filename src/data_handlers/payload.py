@@ -1,4 +1,4 @@
-from ..exceptions.http_exceptions import UnsupportedMediaType
+from ..exceptions.http_exceptions import UnsupportedMediaTypeException
 
 class JsonPayload:
     @staticmethod
@@ -15,6 +15,6 @@ class MediaPayloadHandler:
     def parse(cls, type, data):
         handler = cls.media_types.get(type, None)
         if (not handler):
-            raise UnsupportedMediaType()
+            raise UnsupportedMediaTypeException()
 
         return handler.parse(data)
